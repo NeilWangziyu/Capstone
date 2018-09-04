@@ -221,7 +221,7 @@ for parent, subdir, filenames in os.walk(rootpath):
 
             #print('gesture shape:',len(gesture))
 
-            EMGDATA.append(gesture)
+            EMGDATA.append(max_min_normalization(gesture))
             EMGLABEL.append(i)
 
 

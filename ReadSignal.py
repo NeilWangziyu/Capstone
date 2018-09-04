@@ -25,11 +25,6 @@ def butter_lowpass_filter(data, cutoff, fs, order=6):
 
 
 
-
-
-
-
-
 emg1 = []
 emg2 = []
 emg3 = []
@@ -39,7 +34,7 @@ emg6 = []
 emg7 = []
 emg8 = []
 
-filename = '/Users/ziyu/Desktop/Capstone/emg_data/emg_yu_169.csv'
+filename = '/Users/ziyu/资料/我的课程与资料/研一下/Capstone/testdata/emg_yu_169.csv'
 with open(filename) as f:
     reader = csv.reader(f)
     # 读取一行，下面的reader中已经没有该行了
