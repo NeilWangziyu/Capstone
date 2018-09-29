@@ -211,6 +211,19 @@ for parent, subdir, filenames in os.walk(rootpath):
             gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
 
+            # normalization
+            gesture_emg1_bspline_abs = max_min_normalization(gesture_emg1_bspline_abs)
+            gesture_emg2_bspline_abs = max_min_normalization(gesture_emg2_bspline_abs)
+            gesture_emg3_bspline_abs = max_min_normalization(gesture_emg3_bspline_abs)
+            gesture_emg4_bspline_abs = max_min_normalization(gesture_emg4_bspline_abs)
+            gesture_emg5_bspline_abs = max_min_normalization(gesture_emg5_bspline_abs)
+            gesture_emg6_bspline_abs = max_min_normalization(gesture_emg6_bspline_abs)
+            gesture_emg7_bspline_abs = max_min_normalization(gesture_emg7_bspline_abs)
+            gesture_emg8_bspline_abs = max_min_normalization(gesture_emg8_bspline_abs)
+
+
+
+
             gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
             gesture = np.append(gesture, gesture_emg3_bspline_abs)
             gesture = np.append(gesture, gesture_emg4_bspline_abs)
@@ -221,7 +234,7 @@ for parent, subdir, filenames in os.walk(rootpath):
 
             #print('gesture shape:',len(gesture))
 
-            EMGDATA.append(max_min_normalization(gesture))
+            EMGDATA.append(gesture)
             EMGLABEL.append(i)
 
 
@@ -278,6 +291,7 @@ print("number of category:10")
 model = Sequential()
 model.add(Convolution2D(30,(3,3),batch_input_shape=(None,1, 200,200),activation='relu', data_format='channels_first'))
 model.add(MaxPooling2D(pool_size=(2,2)))
+
 model.add(Convolution2D(15,(3,3),activation='relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 
