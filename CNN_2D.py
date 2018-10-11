@@ -278,14 +278,15 @@ print("number of category:10")
 model = Sequential()
 model.add(Convolution2D(30,(3,3),batch_input_shape=(None,1, 200,200),activation='relu', data_format='channels_first'))
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Convolution2D(15,(3,3),activation='relu'))
+model.add(Convolution2D(60,(3,3),activation='relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 
 model.add(Flatten())
 
 model.add(Dense(128,activation='relu'))
+model.add((Dropout(0.3)))
 model.add(Dense(50,activation='relu'))
-model.add((Dropout(0.2)))
+model.add((Dropout(0.3)))
 model.add(Dense(10,activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])

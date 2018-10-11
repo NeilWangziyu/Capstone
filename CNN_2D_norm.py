@@ -298,14 +298,16 @@ model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Flatten())
 
 model.add(Dense(128,activation='relu'))
+model.add((Dropout(0.3)))
+
 model.add(Dense(50,activation='relu'))
-model.add((Dropout(0.2)))
+model.add((Dropout(0.3)))
 model.add(Dense(10,activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
 print('Training ------------')
 
-model.fit(X_train, y_train, epochs=20, batch_size=100)
+model.fit(X_train, y_train, epochs=50, batch_size=64)
 
 print('model training finished')
 model.summary()

@@ -5,6 +5,8 @@ from scipy.signal import butter, filtfilt
 import matplotlib.pyplot as plt
 import csv
 from keras.models import load_model
+import time
+import json
 
 fs = 200
 cutoff = 25
@@ -106,11 +108,6 @@ def readgesture(file):
     gesture_emg5_bspline = interpolate.splev(x_new, tck_emg5)
     gesture_emg5_bspline_abs = list(map(abs, gesture_emg5_bspline))
 
-    gesture_emg5 = np.array(emg5_abs)
-    tck_emg5 = interpolate.splrep(x, gesture_emg5)
-    gesture_emg5_bspline = interpolate.splev(x_new, tck_emg5)
-    gesture_emg5_bspline_abs = list(map(abs, gesture_emg5_bspline))
-
     gesture_emg6 = np.array(emg6_abs)
     tck_emg6 = interpolate.splrep(x, gesture_emg6)
     gesture_emg6_bspline = interpolate.splev(x_new, tck_emg6)
@@ -157,10 +154,28 @@ def readgesture(file):
 if __name__ == '__main__':
     # load my model
     model = load_model('my_CNN_model.h5')
+    while(True):
+        time_start = time.clock()
 
-    file = 'one_gesture.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)
+        file = 'one_gesture.csv'
+        gesture = readgesture(file)
+        result = model.predict(gesture)
+        result = result.argmax(axis=-1)[0]
+        elapsed = (time.clock() - time_start)
+        print(type(result))
+        print('这个动作为：',result,' 使用时间：',elapsed)
 
-    print('这个动作为：',result)
+        result = result.tolist()
+        print(type(result))
+
+        data = {"result": result}
+
+        with open("result.json", 'w') as json_file:
+            json.dump(data, json_file)
+
+        time.sleep(0.5)
+        print("完成一次扫描")
+
+
+
+
