@@ -147,15 +147,15 @@ def readgesture(file):
 
     # reshape gesture
     gesture = np.array(gesture)
-    # gesture = gesture.reshape(-1, 1, 200, 200)
+    gesture = gesture.reshape(-1, 1, 200, 200)
     # gesture = gesture.reshape(-1, 8, 5000)
-    gesture = gesture.reshape(-1, 1, 8, 5000)
+    # gesture = gesture.reshape(-1, 1, 8, 5000)
     return gesture
 
 
 if __name__ == '__main__':
     # load my model
-    model = load_model('CNN_1D.h5')
+    model = load_model('my_CNN_model_2D_norm_allSmooth.h5')
     # while(True):
     #     time_start = time.clock()
     #
@@ -178,90 +178,15 @@ if __name__ == '__main__':
     #     time.sleep(0.5)
     #     print("完成一次扫描")
 
-
-    time_start = time.clock()
-    file = 'testing10gestures/AG.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    # print(type(result))
-    print('AG这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/CH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('CH这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/EH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('EH这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/FG.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('FG这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/FH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('FH这个动作为：', result, ' 使用时间：', elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/GF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('GF这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/OH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('OH这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/TLF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('TM这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/TRF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('TRF这个动作为：', result, ' 使用时间：', elapsed)
+    for i in range(10):
+        time_start = time.clock()
+        file = 'figure-10.12/{}.csv'.format(i)
+        # file = 'gesture1.csv'
+        gesture = readgesture(file)
+        result = model.predict(gesture)
+        result = result.argmax(axis=-1)[0]
+        elapsed = (time.clock() - time_start)
+        print(i,'这个动作为：',result,' 使用时间：',elapsed)
 
 
 

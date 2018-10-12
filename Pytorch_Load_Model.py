@@ -7,6 +7,7 @@ import time
 from scipy.signal import butter, filtfilt
 import csv
 from scipy import interpolate
+import matplotlib.pyplot as plt
 
 class CNN(nn.Module):
     def __init__(self):
@@ -15,7 +16,7 @@ class CNN(nn.Module):
             nn.Conv1d(
                 in_channels = 8,
                 out_channels = 60,
-                kernel_size = 18,
+                kernel_size = 15,
                 stride=1,
                 padding=2
                 # 想要con2d卷积出来的图片尺寸没有变化, padding=(kernel_size-1)/2
@@ -31,14 +32,14 @@ class CNN(nn.Module):
             nn.Conv1d(
                 in_channels=30,
                 out_channels=60,
-                kernel_size=5,
+                kernel_size=3,
                 stride=1,
                 padding=2),  # (32, 121, 9)
             nn.ReLU(),  # (32, 121, 9))
             nn.MaxPool2d(kernel_size=(2,2)),# (32, 61, 5))
         )
 
-        self.dense1 = nn.Linear(37380, 128)
+        self.dense1 = nn.Linear(37440, 128)
         self.drop1 = nn.Dropout(p=0.3)
         self.dense2 = nn.Linear(128, 50)
         self.drop2 = nn.Dropout(p=0.3)
@@ -57,7 +58,6 @@ class CNN(nn.Module):
         x = self.out(x)
         output = self.logsoftmax(x)
         return output, x
-
 
 
 fs = 200
@@ -176,27 +176,30 @@ def readgesture(file):
     gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
     # normalization
-    gesture_emg1_bspline_abs = max_min_normalization(gesture_emg1_bspline_abs)
-    gesture_emg2_bspline_abs = max_min_normalization(gesture_emg2_bspline_abs)
-    gesture_emg3_bspline_abs = max_min_normalization(gesture_emg3_bspline_abs)
-    gesture_emg4_bspline_abs = max_min_normalization(gesture_emg4_bspline_abs)
-    gesture_emg5_bspline_abs = max_min_normalization(gesture_emg5_bspline_abs)
-    gesture_emg6_bspline_abs = max_min_normalization(gesture_emg6_bspline_abs)
-    gesture_emg7_bspline_abs = max_min_normalization(gesture_emg7_bspline_abs)
-    gesture_emg8_bspline_abs = max_min_normalization(gesture_emg8_bspline_abs)
+    # gesture_emg1_bspline_abs = max_min_normalization(gesture_emg1_bspline_abs)
+    # gesture_emg2_bspline_abs = max_min_normalization(gesture_emg2_bspline_abs)
+    # gesture_emg3_bspline_abs = max_min_normalization(gesture_emg3_bspline_abs)
+    # gesture_emg4_bspline_abs = max_min_normalization(gesture_emg4_bspline_abs)
+    # gesture_emg5_bspline_abs = max_min_normalization(gesture_emg5_bspline_abs)
+    # gesture_emg6_bspline_abs = max_min_normalization(gesture_emg6_bspline_abs)
+    # gesture_emg7_bspline_abs = max_min_normalization(gesture_emg7_bspline_abs)
+    # gesture_emg8_bspline_abs = max_min_normalization(gesture_emg8_bspline_abs)
 
-    #gesture size：5000*8
-    gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
-    gesture = np.append(gesture, gesture_emg3_bspline_abs)
-    gesture = np.append(gesture, gesture_emg4_bspline_abs)
-    gesture = np.append(gesture, gesture_emg5_bspline_abs)
-    gesture = np.append(gesture, gesture_emg6_bspline_abs)
-    gesture = np.append(gesture, gesture_emg7_bspline_abs)
-    gesture = np.append(gesture, gesture_emg8_bspline_abs)
+    #gesture size：8*5000
+    # gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg3_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg4_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg5_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg6_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg7_bspline_abs)
+    # gesture = np.append(gesture, gesture_emg8_bspline_abs)
+    gesture = [gesture_emg1_bspline_abs, gesture_emg2_bspline_abs, gesture_emg3_bspline_abs, gesture_emg4_bspline_abs,
+               gesture_emg5_bspline_abs, gesture_emg6_bspline_abs, gesture_emg7_bspline_abs, gesture_emg8_bspline_abs]
 
     # smoothed
     gesture = butter_lowpass_filter(gesture, cutoff, fs)
-
+    plt.plot(gesture)
+    plt.show()
     # reshape gesture
     gesture = np.array(gesture)
     # gesture = gesture.reshape(-1, 1, 200, 200)
@@ -206,12 +209,12 @@ def readgesture(file):
 
 if __name__ == "__main__":
 
-    cnn = torch.load('PytorchModel_CNN_1D_norm_2.pkl')
+    cnn = torch.load('PytorchModel_CNN_1D_norm.pkl')
 
-    for i in range(1):
+    for i in range(10):
         time_start = time.clock()
-        # file = '10gestures_1/{}.csv'.format(i+1)
-        file = 'gesture1.csv'
+        file = 'figure-10.12/{}.csv'.format(i)
+        # file = 'gesture1.csv'
         gesture = readgesture(file)
         gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
         test_output = cnn(gesture)[0]

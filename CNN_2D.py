@@ -211,14 +211,15 @@ for parent, subdir, filenames in os.walk(rootpath):
             gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
 
-            gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
-            gesture = np.append(gesture, gesture_emg3_bspline_abs)
-            gesture = np.append(gesture, gesture_emg4_bspline_abs)
-            gesture = np.append(gesture, gesture_emg5_bspline_abs)
-            gesture = np.append(gesture, gesture_emg6_bspline_abs)
-            gesture = np.append(gesture, gesture_emg7_bspline_abs)
-            gesture = np.append(gesture, gesture_emg8_bspline_abs)
-
+            # gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg3_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg4_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg5_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg6_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg7_bspline_abs)
+            # gesture = np.append(gesture, gesture_emg8_bspline_abs)
+            gesture = [gesture_emg1_bspline_abs,gesture_emg2_bspline_abs,gesture_emg3_bspline_abs,gesture_emg4_bspline_abs,
+                       gesture_emg5_bspline_abs,gesture_emg6_bspline_abs,gesture_emg7_bspline_abs,gesture_emg8_bspline_abs]
             #print('gesture shape:',len(gesture))
 
             EMGDATA.append(gesture)
@@ -253,11 +254,12 @@ print('length of EMGLABEL',len(EMGLABEL))
 #
 # finishPCA = (time.clock() - startPCA)
 # print("PCA Time used:",finishPCA)
-print(EMGLABEL)
-
+# print(EMGLABEL)
+np.save("EMGDATA_unnorm.npy",np.array(EMGDATA))
+np.save("EMGLABEL.npy",np.array(EMGLABEL))
 X_train, X_test, y_train, y_test = train_test_split(EMGDATA, EMGLABEL, test_size=0.3)
-X_train = EMGDATA
-y_train = EMGLABEL
+# X_train = EMGDATA
+# y_train = EMGLABEL
 print("length of X_train:", len(X_train))
 print("feature used", len(X_train[0]))
 
