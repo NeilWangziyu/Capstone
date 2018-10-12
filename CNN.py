@@ -231,8 +231,12 @@ print("totally read csv file number:",count)
 
 print('length of EMGDATA:', len(EMGDATA))
 print('length of EMGLABEL',len(EMGLABEL))
+np.save("EMGDATA_un.npy",np.array(EMGDATA))
+np.save("EMGLABEL.npy",np.array(EMGLABEL))
+EMGDATA = np.array(EMGDATA)
+EMGLABEL = np.array(EMGLABEL)
+#print(EMGDATA)np.save("EMGDATA.npy",EMGDATA)
 
-#print(EMGDATA)
 #EMGDATA AND EMGLABEL is the training data
 
 
@@ -248,7 +252,7 @@ print('length of EMGLABEL',len(EMGLABEL))
 #
 # finishPCA = (time.clock() - startPCA)
 # print("PCA Time used:",finishPCA)
-print(EMGLABEL)
+# print(EMGLABEL)
 
 X_train, X_test, y_train, y_test = train_test_split(EMGDATA, EMGLABEL, test_size=0.3)
 print("length of X_train:", len(X_train))
@@ -256,8 +260,8 @@ print("feature used", len(X_train[0]))
 
 X_train=np.array(X_train)
 X_test=np.array(X_test)
-X_train = X_train.reshape(-1, 200, 200)
-X_test = X_test.reshape(-1, 200,200)
+X_train = X_train.reshape(-1, 8, 5000)
+X_test = X_test.reshape(-1, 8,5000)
 
 
 print('start to train CNN')
@@ -269,22 +273,25 @@ y_test = np_utils.to_categorical(y_test,num_classes=10)
 print("number of category:10")
 
 model = Sequential()
-model.add(Convolution1D(30,5,batch_input_shape=(None,200,200),activation='relu'))
-model.add(MaxPooling1D(pool_size=2))
-model.add(Convolution1D(15,5,activation='relu'))
-model.add(MaxPooling1D(pool_size=2))
+model.add(Convolution1D(90,3,batch_input_shape=(None,8,5000),activation='relu'))
+model.add(MaxPooling1D(pool_size=1))
+model.add(Convolution1D(60,3,activation='relu'))
+model.add(MaxPooling1D(pool_size=1))
+model.add(Convolution1D(30,3,activation='relu'))
+model.add(MaxPooling1D(pool_size=1))
 
 model.add(Flatten())
 
 model.add(Dense(128,activation='relu'))
+model.add((Dropout(0.4)))
 model.add(Dense(50,activation='relu'))
-model.add((Dropout(0.2)))
+model.add((Dropout(0.4)))
 model.add(Dense(10,activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
 print('Training ------------')
 
-model.fit(X_train, y_train, epochs=20, batch_size=100)
+model.fit(X_train, y_train, epochs=50, batch_size=96)
 
 print('model training finished')
 model.summary()
@@ -309,9 +316,11 @@ print("CNN Time used:",finishCNN)
 # print("similiarity:", same/len(y_test))
 
 #save the architecture of CNN and weights of CNN
-model.save('my_CNN_model.h5')
-print('model is saved as my_CNN_model.h5')
+model.save('CNN_1D.h5')
+print('model is saved as CNN_1D.h5')
 
 #import model and weight
+
+
 
 

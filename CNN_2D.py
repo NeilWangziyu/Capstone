@@ -256,6 +256,8 @@ print('length of EMGLABEL',len(EMGLABEL))
 print(EMGLABEL)
 
 X_train, X_test, y_train, y_test = train_test_split(EMGDATA, EMGLABEL, test_size=0.3)
+X_train = EMGDATA
+y_train = EMGLABEL
 print("length of X_train:", len(X_train))
 print("feature used", len(X_train[0]))
 
@@ -317,8 +319,8 @@ print("CNN Time used:",finishCNN)
 # print("similiarity:", same/len(y_test))
 
 #save the architecture of CNN and weights of CNN
-model.save('my_CNN_model.h5')
-print('model is saved as my_CNN_model.h5')
+model.save('final_CNN_model_no_norm.h5')
+print('model is saved as final_CNN_model_no_norm.h5')
 
 #import model and weight
 

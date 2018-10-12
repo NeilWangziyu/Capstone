@@ -1,12 +1,64 @@
+import torch
+import torch.nn as nn
+import torch.utils.data as Data
 import numpy as np
-import pylab as pl
-from scipy import interpolate
 from scipy.signal import butter, filtfilt
-import matplotlib.pyplot as plt
-import csv
-from keras.models import load_model
 import time
-import json
+from scipy.signal import butter, filtfilt
+import csv
+from scipy import interpolate
+
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv1d(
+                in_channels = 8,
+                out_channels = 60,
+                kernel_size = 18,
+                stride=1,
+                padding=2
+                # 想要con2d卷积出来的图片尺寸没有变化, padding=(kernel_size-1)/2
+            ),# output shape (16, 241, 17)
+
+            nn.ReLU(),
+
+            nn.MaxPool2d(kernel_size=(2,2)),
+            # output shape (16, 121, 9)
+        )
+
+        self.conv2 = nn.Sequential(
+            nn.Conv1d(
+                in_channels=30,
+                out_channels=60,
+                kernel_size=5,
+                stride=1,
+                padding=2),  # (32, 121, 9)
+            nn.ReLU(),  # (32, 121, 9))
+            nn.MaxPool2d(kernel_size=(2,2)),# (32, 61, 5))
+        )
+
+        self.dense1 = nn.Linear(37380, 128)
+        self.drop1 = nn.Dropout(p=0.3)
+        self.dense2 = nn.Linear(128, 50)
+        self.drop2 = nn.Dropout(p=0.3)
+        self.out = nn.Linear(50, 10)
+        self.logsoftmax = nn.LogSoftmax()
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = x.view(x.size(0), -1)
+        x = self.dense1(x)
+        x = self.drop1(x)
+        x = self.dense2(x)
+        x = self.drop2(x)
+        x = self.out(x)
+        output = self.logsoftmax(x)
+        return output, x
+
+
 
 fs = 200
 cutoff = 25
@@ -148,122 +200,24 @@ def readgesture(file):
     # reshape gesture
     gesture = np.array(gesture)
     # gesture = gesture.reshape(-1, 1, 200, 200)
-    # gesture = gesture.reshape(-1, 8, 5000)
-    gesture = gesture.reshape(-1, 1, 8, 5000)
+    gesture = gesture.reshape(-1, 8, 5000)
+    # gesture = gesture.reshape(-1, 1, 8, 5000)
     return gesture
 
+if __name__ == "__main__":
 
-if __name__ == '__main__':
-    # load my model
-    model = load_model('CNN_1D.h5')
-    # while(True):
-    #     time_start = time.clock()
-    #
-    #     file = 'one_gesture.csv'
-    #     gesture = readgesture(file)
-    #     result = model.predict(gesture)
-    #     result = result.argmax(axis=-1)[0]
-    #     elapsed = (time.clock() - time_start)
-    #     print(type(result))
-    #     print('这个动作为：',result,' 使用时间：',elapsed)
-    #
-    #     result = result.tolist()
-    #     print(type(result))
-    #
-    #     data = {"result": result}
-    #
-    #     with open("result.json", 'w') as json_file:
-    #         json.dump(data, json_file)
-    #
-    #     time.sleep(0.5)
-    #     print("完成一次扫描")
+    cnn = torch.load('PytorchModel_CNN_1D_norm_2.pkl')
 
-
-    time_start = time.clock()
-    file = 'testing10gestures/AG.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    # print(type(result))
-    print('AG这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/CH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('CH这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/EH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('EH这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/FG.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('FG这个动作为：',result,' 使用时间：',elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/FH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('FH这个动作为：', result, ' 使用时间：', elapsed)
-
-    time_start = time.clock()
-    file = 'testing10gestures/GF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('GF这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/OH.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('OH这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/TLF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('TM这个动作为：', result, ' 使用时间：', elapsed)
-
-
-    time_start = time.clock()
-    file = 'testing10gestures/TRF.csv'
-    gesture = readgesture(file)
-    result = model.predict(gesture)
-    result = result.argmax(axis=-1)[0]
-    elapsed = (time.clock() - time_start)
-    print(type(result))
-    print('TRF这个动作为：', result, ' 使用时间：', elapsed)
-
-
+    for i in range(1):
+        time_start = time.clock()
+        # file = '10gestures_1/{}.csv'.format(i+1)
+        file = 'gesture1.csv'
+        gesture = readgesture(file)
+        gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
+        test_output = cnn(gesture)[0]
+        pred_y = torch.max(test_output, 1)[1].data.squeeze()
+        elapsed = (time.clock() - time_start)
+        print(i,'这个动作为：',pred_y.item(),' 使用时间：',elapsed)
 
 
 

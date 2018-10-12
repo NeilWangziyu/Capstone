@@ -6,11 +6,12 @@ def max_min_normalization(x):
 
 if __name__ == '__main__':
     result = np.array(1)
-    result = result.tolist()
-    print(result)
-    print(type(result))
-    data = {"name": result, "age": 18}
 
-    with open("json文件路径", 'w') as json_file:
-        json.dump(data, json_file)
+    # result = result.tolist()
+    # print(result)
+    # print(type(result))
+    # data = {"name": result, "age": 18}
+    #
+    # with open("json文件路径", 'w') as json_file:
+    #     json.dump(data, json_file)
 

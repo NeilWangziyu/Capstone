@@ -211,19 +211,6 @@ for parent, subdir, filenames in os.walk(rootpath):
             gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
 
-            # normalization
-            gesture_emg1_bspline_abs = max_min_normalization(gesture_emg1_bspline_abs)
-            gesture_emg2_bspline_abs = max_min_normalization(gesture_emg2_bspline_abs)
-            gesture_emg3_bspline_abs = max_min_normalization(gesture_emg3_bspline_abs)
-            gesture_emg4_bspline_abs = max_min_normalization(gesture_emg4_bspline_abs)
-            gesture_emg5_bspline_abs = max_min_normalization(gesture_emg5_bspline_abs)
-            gesture_emg6_bspline_abs = max_min_normalization(gesture_emg6_bspline_abs)
-            gesture_emg7_bspline_abs = max_min_normalization(gesture_emg7_bspline_abs)
-            gesture_emg8_bspline_abs = max_min_normalization(gesture_emg8_bspline_abs)
-
-
-
-
             gesture = np.append(gesture_emg1_bspline_abs,gesture_emg2_bspline_abs)
             gesture = np.append(gesture, gesture_emg3_bspline_abs)
             gesture = np.append(gesture, gesture_emg4_bspline_abs)
@@ -267,11 +254,10 @@ print('length of EMGLABEL',len(EMGLABEL))
 # finishPCA = (time.clock() - startPCA)
 # print("PCA Time used:",finishPCA)
 print(EMGLABEL)
-np.save("EMGDATA_un.npy",np.array(EMGDATA))
-np.save("EMGLABEL.npy",np.array(EMGLABEL))
-EMGDATA = np.array(EMGDATA)
-EMGLABEL = np.array(EMGLABEL)
+
 X_train, X_test, y_train, y_test = train_test_split(EMGDATA, EMGLABEL, test_size=0.3)
+# X_train = EMGDATA
+# y_train = EMGLABEL
 print("length of X_train:", len(X_train))
 print("feature used", len(X_train[0]))
 
@@ -279,8 +265,8 @@ print("feature used", len(X_train[0]))
 
 X_train=np.array(X_train)
 X_test=np.array(X_test)
-X_train = X_train.reshape(-1, 1, 200, 200)
-X_test = X_test.reshape(-1, 1, 200,200)
+X_train = X_train.reshape(-1, 1, 8, 5000)
+X_test = X_test.reshape(-1, 1, 8,5000)
 
 
 print('start to train CNN')
@@ -292,25 +278,23 @@ y_test = np_utils.to_categorical(y_test,num_classes=10)
 print("number of category:10")
 
 model = Sequential()
-model.add(Convolution2D(30,(3,3),batch_input_shape=(None,1, 200,200),activation='relu', data_format='channels_first'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-
-model.add(Convolution2D(15,(3,3),activation='relu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Convolution2D(30,(3,3),batch_input_shape=(None, 1, 8,5000),activation='relu', data_format='channels_first'))
+model.add(MaxPooling2D(pool_size=(1,1)))
+model.add(Convolution2D(60,(3,3),activation='relu'))
+model.add(MaxPooling2D(pool_size=(1,1)))
 
 model.add(Flatten())
 
 model.add(Dense(128,activation='relu'))
-model.add((Dropout(0.3)))
-
+model.add((Dropout(0.4)))
 model.add(Dense(50,activation='relu'))
-model.add((Dropout(0.3)))
+model.add((Dropout(0.4)))
 model.add(Dense(10,activation='softmax'))
 
 model.compile(loss='categorical_crossentropy',optimizer=Adam(),metrics=['accuracy'])
 print('Training ------------')
 
-model.fit(X_train, y_train, epochs=50, batch_size=64)
+model.fit(X_train, y_train, epochs=20, batch_size=100)
 
 print('model training finished')
 model.summary()
@@ -335,8 +319,8 @@ print("CNN Time used:",finishCNN)
 # print("similiarity:", same/len(y_test))
 
 #save the architecture of CNN and weights of CNN
-model.save('my_CNN_model.h5')
-print('model is saved as my_CNN_model.h5')
+model.save('CNN_8x5000_2D.h5')
+print('model is saved as CNN_8x5000_2D.h5')
 
 #import model and weight
 
