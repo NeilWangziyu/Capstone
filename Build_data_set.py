@@ -153,7 +153,7 @@ for parent, subdir, filenames in os.walk(rootpath):
             else:
                  print("wrong")
 
-        #cutpoint is the result of segment, make 10 segments
+        #cutpoint is the result o segment, make 10 segments
 
         # i is from 0 - 10
         for i in range(0, len(cutpoint) - 1):
@@ -255,5 +255,5 @@ print("totally read csv file number:",count)
 print('length of EMGDATA:', len(EMGDATA))
 print('length of EMGLABEL',len(EMGLABEL))
 
-np.save("EMGDATA_norm.npy",np.array(EMGDATA))
-np.save("EMGLABEL.npy",np.array(EMGLABEL))
+np.save("EMGDATA_norm_extended.npy",np.array(EMGDATA))
+np.save("EMGLABEL_extended.npy",np.array(EMGLABEL))

@@ -4,7 +4,9 @@ import time
 from scipy.signal import butter, filtfilt
 import csv
 from scipy import interpolate
-import matplotlib.pyplot as plt
+import json
+import os
+import paramiko
 from CNN_1D_Training import CNN
 
 
@@ -72,8 +74,7 @@ def readgesture(file):
     emg8_abs = list(map(abs, emg8))
     # emg and emg_abs's different
 
-    # plt.plot(emg1_abs)
-    # plt.show()
+
 
     x = np.linspace(0, len(emg1_abs), len(emg1_abs))
     x_new = np.linspace(0, len(emg1_abs), 5000)
@@ -82,11 +83,8 @@ def readgesture(file):
     gesture_emg1 = butter_lowpass_filter(gesture_emg1, cutoff, fs)
     tck_emg1 = interpolate.splrep(x, gesture_emg1)
     gesture_emg1_bspline = interpolate.splev(x_new, tck_emg1)
-    # plt.plot(gesture_emg1_bspline)
-    # plt.show()
     gesture_emg1_bspline_abs = list(map(abs, gesture_emg1_bspline))
-    # plt.plot(gesture_emg1_bspline_abs)
-    # plt.show()
+
 
     gesture_emg2 = np.array(emg2_abs)
     gesture_emg2 = butter_lowpass_filter(gesture_emg2, cutoff, fs)
@@ -130,8 +128,6 @@ def readgesture(file):
     gesture_emg8_bspline = interpolate.splev(x_new, tck_emg8)
     gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
-
-
     #gesture size：8*5000
     gesture = np.append(gesture_emg1_bspline_abs, gesture_emg2_bspline_abs)
     gesture = np.append(gesture, gesture_emg3_bspline_abs)
@@ -146,25 +142,6 @@ def readgesture(file):
 
     gesture = gesture.reshape(1, 8, 5000)
 
-    # print(gesture.shape)
-    # plt.subplot(4, 2, 1)
-    # plt.plot(gesture[0, 0, :])
-    # plt.subplot(4, 2, 2)
-    # plt.plot(gesture[0, 1, :])
-    # plt.subplot(4, 2, 3)
-    # plt.plot(gesture[0, 2, :])
-    # plt.subplot(4, 2, 4)
-    # plt.plot(gesture[0, 3, :])
-    # plt.subplot(4, 2, 5)
-    # plt.plot(gesture[0, 4, :])
-    # plt.subplot(4, 2, 6)
-    # plt.plot(gesture[0, 5, :])
-    # plt.subplot(4, 2, 7)
-    # plt.plot(gesture[0, 6, :])
-    # plt.subplot(4, 2, 8)
-    # plt.plot(gesture[0, 7, :])
-    # plt.show()
-
     return gesture
 
 
@@ -174,70 +151,68 @@ def readgesture(file):
 if __name__ == "__main__":
 
     cnn = torch.load('PytorchModel_CNN_1D_norm_extended_all.pkl')
+    init_time = "Oct 12 00:35:11"
 
-    for i in range(10):
-        time_start = time.clock()
-        file = 'Test_10/{}.csv'.format(i)
-        # file = 'gesture1.csv'
-        gesture = readgesture(file)
-        gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
-        test_output = cnn(gesture)[0]
-        pred_y = torch.max(test_output, 1)[1].data.squeeze()
-        elapsed = (time.clock() - time_start)
-        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+    while(True):
+        start_time = time.clock()
+        file_name = "gesture0.csv"
+        filemt = time.localtime(os.stat(file_name).st_mtime)
+        filemt = time.strftime("%b %d %H:%M:%S", filemt)
+        if filemt == init_time:
+            print("和上一次时间相同,返回10")
+            data = {"name": 10}
+            with open("result.json", 'w') as json_file:
+                json.dump(data, json_file)
 
-
-    file = 'gesture1.csv'
-    gesture = readgesture(file)
-    print(gesture.shape)
-    plt.subplot(4, 2, 1)
-    plt.plot(gesture[0, 0, :])
-    plt.subplot(4, 2, 2)
-    plt.plot(gesture[0, 1, :])
-    plt.subplot(4, 2, 3)
-    plt.plot(gesture[0, 2, :])
-    plt.subplot(4, 2, 4)
-    plt.plot(gesture[0, 3, :])
-    plt.subplot(4, 2, 5)
-    plt.plot(gesture[0, 4, :])
-    plt.subplot(4, 2, 6)
-    plt.plot(gesture[0, 5, :])
-    plt.subplot(4, 2, 7)
-    plt.plot(gesture[0, 6, :])
-    plt.subplot(4, 2, 8)
-    plt.plot(gesture[0, 7, :])
-    plt.show()
-
-    gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
-    test_output = cnn(gesture)[0]
-    pred_y = torch.max(test_output, 1)[1].data.squeeze()
-    print(file,'这个动作为', pred_y.item())
+        else:
+            emg1 = []
+            with open(file_name) as f:
+                reader = csv.reader(f)
+                # 读取一行，下面的reader中已经没有该行了
+                head_row = next(reader)
+                for row in reader:
+                    # 行号从2开始
+                    emg1.append(row[1])
+            if len(emg1)<=100 or len(emg1)>=5000:
+                print("数据过长，返回10")
+                data = {"name": 10}
+                with open("result.json", 'w') as json_file:
+                    json.dump(data, json_file)
 
 
-    file = 'gesture0.csv'
-    gesture = readgesture(file)
-    print(gesture.shape)
-    plt.subplot(4, 2, 1)
-    plt.plot(gesture[0, 0, :])
-    plt.subplot(4, 2, 2)
-    plt.plot(gesture[0, 1, :])
-    plt.subplot(4, 2, 3)
-    plt.plot(gesture[0, 2, :])
-    plt.subplot(4, 2, 4)
-    plt.plot(gesture[0, 3, :])
-    plt.subplot(4, 2, 5)
-    plt.plot(gesture[0, 4, :])
-    plt.subplot(4, 2, 6)
-    plt.plot(gesture[0, 5, :])
-    plt.subplot(4, 2, 7)
-    plt.plot(gesture[0, 6, :])
-    plt.subplot(4, 2, 8)
-    plt.plot(gesture[0, 7, :])
-    plt.show()
+            else:
+                gesture = readgesture(file_name)
+                # print(gesture.shape)
+                gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
+                test_output = cnn(gesture)[0]
+                pred_y = torch.max(test_output, 1)[1].data.squeeze()
+                print("read",file_name, '这个动作为', pred_y.item())
+                data = {"name": pred_y.item()}
 
-    gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
-    test_output = cnn(gesture)[0]
-    pred_y = torch.max(test_output, 1)[1].data.squeeze()
-    print(file, '这个动作为', pred_y.item())
+                with open("result.json", 'w') as json_file:
+                    json.dump(data, json_file)
+
+
+        #     上传JSON文件
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # 跳过了远程连接中选择‘是’的环节,
+            ssh.connect('119.23.243.57', 22, 'root', 'Fdan123@')
+            transport = paramiko.Transport(('119.23.243.57', 22))
+            transport.connect(username='root', password='Fdan123@')
+            stdin, stdout, stderr = ssh.exec_command('df')  # ssh 协议栈命令
+            # for line in stdout:  # 逐行打印回显
+            #     print(line)
+            sftp = paramiko.SFTPClient.from_transport(transport)
+            # 将location.py 上传至服务器 /tmp/test.py,都是绝对路径，不是文件夹
+            sftp.put('result.json', 'result/result.json')
+            transport.close()
+            elapsed = (time.clock() - start_time)
+            print("完成传输，用时：",elapsed)
+
+        time.sleep(1)
+
+
+
+
 
 

@@ -5,7 +5,7 @@ from scipy.signal import butter, filtfilt
 import csv
 from scipy import interpolate
 import matplotlib.pyplot as plt
-from CNN_1D_Training import CNN
+from CNN_1D_BN_Training import CNN
 
 
 fs = 200
@@ -146,25 +146,6 @@ def readgesture(file):
 
     gesture = gesture.reshape(1, 8, 5000)
 
-    # print(gesture.shape)
-    # plt.subplot(4, 2, 1)
-    # plt.plot(gesture[0, 0, :])
-    # plt.subplot(4, 2, 2)
-    # plt.plot(gesture[0, 1, :])
-    # plt.subplot(4, 2, 3)
-    # plt.plot(gesture[0, 2, :])
-    # plt.subplot(4, 2, 4)
-    # plt.plot(gesture[0, 3, :])
-    # plt.subplot(4, 2, 5)
-    # plt.plot(gesture[0, 4, :])
-    # plt.subplot(4, 2, 6)
-    # plt.plot(gesture[0, 5, :])
-    # plt.subplot(4, 2, 7)
-    # plt.plot(gesture[0, 6, :])
-    # plt.subplot(4, 2, 8)
-    # plt.plot(gesture[0, 7, :])
-    # plt.show()
-
     return gesture
 
 
@@ -173,7 +154,7 @@ def readgesture(file):
 
 if __name__ == "__main__":
 
-    cnn = torch.load('PytorchModel_CNN_1D_norm_extended_all.pkl')
+    cnn = torch.load('PytorchModel_CNN_1D_BN_norm_extended.pkl')
 
     for i in range(10):
         time_start = time.clock()

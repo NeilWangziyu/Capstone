@@ -62,8 +62,8 @@ if __name__ == "__main__":
 
     time_readstart = time.clock()
 
-    EMGDATA = np.load("EMGDATA_norm.npy")
-    EMGLABEL = np.load("EMGLABEL.npy")
+    EMGDATA = np.load("EMGDATA_norm_extended.npy")
+    EMGLABEL = np.load("EMGLABEL_extended.npy")
 
     finishREAD = (time.clock() - time_readstart)
 
@@ -75,7 +75,8 @@ if __name__ == "__main__":
     # plt.title(EMGLABEL[0])
     # plt.show()
     X_train, X_test, y_train, y_test = train_test_split(EMGDATA, EMGLABEL, test_size=0.3)
-
+    X_train = EMGDATA
+    y_train = EMGLABEL
     print("length of X_train:", len(X_train))
 
     # X_train = np.array(X_train)
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(cnn.parameters(), lr=1e-3)
     loss_func = nn.CrossEntropyLoss()  # the target label is not one-hotted
 
-    for epoch in range(30):
+    for epoch in range(40):
         for step, (b_x, b_y) in enumerate(train_loader):  # gives batch data, normalize x when iterate train_loader
 
             output = cnn(b_x)[0]                          # cnn output
@@ -175,6 +176,6 @@ if __name__ == "__main__":
 
     print("训练", epoch + 1, "次后，测试", total, "个数据, ", "准确率为：", accuracy.data)
 
-    torch.save(cnn, "PytorchModel_CNN_1D_norm.pkl")
+    torch.save(cnn, "PytorchModel_CNN_1D_norm_extended_all.pkl")
 
 

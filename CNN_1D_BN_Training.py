@@ -1,7 +1,4 @@
 import numpy as np
-from scipy import interpolate
-import matplotlib
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import time
 import torch
@@ -107,8 +104,8 @@ if __name__ == "__main__":
 
     X_train = torch.from_numpy(np.array(X_train)).type(torch.FloatTensor)
     X_test = torch.from_numpy(np.array(X_test)).type(torch.FloatTensor)
-    y_train = torch.from_numpy(np.array(y_train))
-    y_test = torch.from_numpy(np.array(y_test))
+    y_train = torch.from_numpy(np.array(y_train)).type(torch.LongTensor)
+    y_test = torch.from_numpy(np.array(y_test)).type(torch.LongTensor)
 
     # ----------------------------------
 
@@ -177,9 +174,7 @@ if __name__ == "__main__":
         correct += right
 
     accuracy = correct / total
-
     print("训练", epoch + 1, "次后，测试", total, "个数据, ", "准确率为：", accuracy.data)
-
     torch.save(cnn, "PytorchModel_CNN_1D_BN_norm_extended.pkl")
 
 
