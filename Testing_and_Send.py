@@ -165,6 +165,7 @@ if __name__ == "__main__":
                 json.dump(data, json_file)
 
         else:
+            init_time = filemt
             emg1 = []
             with open(file_name) as f:
                 reader = csv.reader(f)
