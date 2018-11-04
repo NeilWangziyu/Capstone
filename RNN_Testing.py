@@ -162,5 +162,17 @@ if __name__ == "__main__":
         pred_y = torch.max(test_output, 1)[1].data.squeeze()
         elapsed = (time.clock() - time_start)
         print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+    print("\n")
 
+    for i in range(10):
+        time_start = time.clock()
+        file = 'figure2-10.12/{}.csv'.format(i)
+        # file = 'gesture1.csv'
+        gesture = readgesture(file)
+        gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
+        gesture = gesture.view(-1, 8, 500)
+        test_output = rnn(gesture)
+        pred_y = torch.max(test_output, 1)[1].data.squeeze()
+        elapsed = (time.clock() - time_start)
+        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
 
