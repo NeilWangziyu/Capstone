@@ -16,25 +16,19 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.rnn = nn.LSTM(
             input_size=500,
-            hidden_size=128,
+            hidden_size=64,
             num_layers=1,
             batch_first=True
         )
-        self.dense = nn.Linear(128, 64)
-        self.dropout = nn.Dropout(0.4)
         self.out = nn.Linear(64, 10)
-        self.logsoftmax = nn.LogSoftmax()
 
 
     def forward(self, x):
         r_out, (h_n, h_c) = self.rnn(x, None)
         # h_n shape (n_layers, batch, hidden_size)   LSTM 有两个 hidden states, h_n 是分线, h_c 是主线
         # h_c shape (n_layers, batch, hidden_size)
-        x = self.dense(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
-        x = self.dropout(x)
-        x = self.out(x)
-        output = self.logsoftmax(x)
-        return output
+        out = self.out(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
+        return out
 
 
 def butter_lowpass(cutoff, fs, order=6):
@@ -284,4 +278,30 @@ if __name__ == "__main__":
     print("pred:", pred_y)
     print("true label:", 0)
 
-    torch.save(rnn, "PytorchModel_RNN_extended_modified.pkl")
+    torch.save(rnn, "PytorchModel_RNN_extended.pkl")
+
+    for i in range(10):
+        time_start = time.clock()
+        file = 'Test_10/{}.csv'.format(i)
+        # file = 'gesture1.csv'
+        gesture = readgesture(file)
+        gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
+        gesture = gesture.view(-1, 8, 500)
+        test_output = rnn(gesture)
+        pred_y = torch.max(test_output, 1)[1].data.squeeze()
+        elapsed = (time.clock() - time_start)
+        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+    print("\n")
+
+    for i in range(10):
+        time_start = time.clock()
+        file = 'figure2-10.12/{}.csv'.format(i)
+        # file = 'gesture1.csv'
+        gesture = readgesture(file)
+        gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
+        gesture = gesture.view(-1, 8, 500)
+        test_output = rnn(gesture)
+        pred_y = torch.max(test_output, 1)[1].data.squeeze()
+        elapsed = (time.clock() - time_start)
+        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+
