@@ -11,24 +11,45 @@ from scipy import interpolate
 fs = 200
 cutoff = 25
 
+
 class RNN(nn.Module):
     def __init__(self):
         super(RNN, self).__init__()
-        self.rnn = nn.LSTM(
+        self.rnn1 = nn.LSTM(
             input_size=500,
-            hidden_size=64,
+            hidden_size=128,
             num_layers=1,
             batch_first=True
         )
-        self.out = nn.Linear(64, 10)
 
+        self.rnn2 = nn.LSTM(
+            input_size=64,
+            hidden_size=32,
+            num_layers=1,
+            batch_first=True
+        )
+        self.out1 = nn.Linear(128, 64)
+        self.out2 = nn.Linear(32, 16)
+        self.drop = nn.Dropout(p=0.4)
+        self.output = nn.Linear(16, 10)
+        self.logsoftmax = nn.LogSoftmax()
 
     def forward(self, x):
-        r_out, (h_n, h_c) = self.rnn(x, None)
+        r_out, (h_n, h_c) = self.rnn1(x, None)
+        x = self.out1(r_out[:, -1, :])
+        x = self.drop(x)
+
+        x = x.unsqueeze(1)
+
+        r_out2, (h_n2, h_c2) = self.rnn2(x)
+
         # h_n shape (n_layers, batch, hidden_size)   LSTM 有两个 hidden states, h_n 是分线, h_c 是主线
         # h_c shape (n_layers, batch, hidden_size)
-        out = self.out(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
-        return out
+        x = self.out2(r_out2[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
+        x = self.drop(x)
+        x = self.output(x)
+        output = self.logsoftmax(x)
+        return output
 
 
 def butter_lowpass(cutoff, fs, order=6):
@@ -36,16 +57,21 @@ def butter_lowpass(cutoff, fs, order=6):
     normal_cutoff = cutoff / nyq
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return b, a
+
+
 #
 def butter_lowpass_filter(data, cutoff, fs, order=6):
     b, a = butter_lowpass(cutoff, fs, order=order)
     y = filtfilt(b, a, data)
     return y
 
+
 # ##############################################################
 # normization
 def max_min_normalization(x):
     return (x - np.min(x)) / (np.max(x) - np.min(x))
+
+
 # ##############################################################
 
 
@@ -150,7 +176,7 @@ def readgesture(file):
     gesture_emg8_bspline = interpolate.splev(x_new, tck_emg8)
     gesture_emg8_bspline_abs = list(map(abs, gesture_emg8_bspline))
 
-    #gesture size：8*500
+    # gesture size：8*500
     gesture = np.append(gesture_emg1_bspline_abs, gesture_emg2_bspline_abs)
     gesture = np.append(gesture, gesture_emg3_bspline_abs)
     gesture = np.append(gesture, gesture_emg4_bspline_abs)
@@ -161,7 +187,6 @@ def readgesture(file):
     gesture = max_min_normalization(gesture)
     gesture = gesture.reshape(1, 8, 500)
     return gesture
-
 
 
 if __name__ == "__main__":
@@ -245,8 +270,8 @@ if __name__ == "__main__":
             test_output = rnn(t_x)
             # pred_y = torch.max(test_output, 1)[1].cuda().data.squeeze()
             pred_y = torch.max(test_output, 1)[1].data.squeeze()
-            print("pred:", pred_y)
-            print("y", t_y)
+            # print("pred:", pred_y)
+            # print("y", t_y)
             right = torch.sum(pred_y == t_y).type(torch.FloatTensor)
             total += t_y.size()[0]
             correct += right
@@ -256,8 +281,6 @@ if __name__ == "__main__":
 
     #     print("本次训练准确率:", score_this_fold)
     print("10折平均准确率：", np.mean(result))
-
-
 
     # 采用所有信号进行训练:
     #
@@ -276,7 +299,7 @@ if __name__ == "__main__":
     optimizer_final = torch.optim.Adam(final_rnn.parameters(), lr=0.01)
     loss_func_final = nn.CrossEntropyLoss()
 
-    for epoch in range(40):
+    for epoch in range(60):
         for step, (b_x, b_y) in enumerate(final_train_loader):
             b_x = b_x.view(-1, 8, 500)
             # print(b_x.shape)
@@ -285,7 +308,6 @@ if __name__ == "__main__":
             optimizer_final.zero_grad()  # clear gradients for this training step
             loss.backward()  # backpropagation, compute gradients
             optimizer_final.step()
-
 
     print("采用此模型对信号进行测试：")
     file = 'gesture1.csv'
@@ -297,7 +319,6 @@ if __name__ == "__main__":
     print("pred:", pred_y)
     print("true label:", 1)
 
-
     print("采用此模型对信号进行测试：")
     file = 'gesture0.csv'
     gesture = readgesture(file)
@@ -308,7 +329,7 @@ if __name__ == "__main__":
     print("pred:", pred_y)
     print("true label:", 0)
 
-    torch.save(final_rnn, "PytorchModel_RNN_all_extended.pkl")
+    # torch.save(final_rnn, "PytorchModel_RNN_all_extended.pkl")
 
     for i in range(10):
         time_start = time.clock()
@@ -320,7 +341,7 @@ if __name__ == "__main__":
         test_output = final_rnn(gesture)
         pred_y = torch.max(test_output, 1)[1].data.squeeze()
         elapsed = (time.clock() - time_start)
-        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+        print(i, '这个动作为', pred_y.item(), ' 使用时间：', elapsed)
     print("\n")
 
     for i in range(10):
@@ -333,5 +354,5 @@ if __name__ == "__main__":
         test_output = final_rnn(gesture)
         pred_y = torch.max(test_output, 1)[1].data.squeeze()
         elapsed = (time.clock() - time_start)
-        print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
+        print(i, '这个动作为', pred_y.item(), ' 使用时间：', elapsed)
 

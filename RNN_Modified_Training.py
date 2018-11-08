@@ -16,19 +16,27 @@ class RNN(nn.Module):
         super(RNN, self).__init__()
         self.rnn = nn.LSTM(
             input_size=500,
-            hidden_size=64,
+            hidden_size=128,
             num_layers=1,
             batch_first=True
         )
-        self.out = nn.Linear(64, 10)
+
+        self.out = nn.Linear(128, 32)
+        self.drop = nn.Dropout(p=0.4)
+        self.output = nn.Linear(32, 10)
+        self.logsoftmax = nn.LogSoftmax()
+
 
 
     def forward(self, x):
         r_out, (h_n, h_c) = self.rnn(x, None)
         # h_n shape (n_layers, batch, hidden_size)   LSTM 有两个 hidden states, h_n 是分线, h_c 是主线
         # h_c shape (n_layers, batch, hidden_size)
-        out = self.out(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
-        return out
+        x = self.out(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
+        x = self.drop(x)
+        x = self.output(x)
+        output = self.logsoftmax(x)
+        return output
 
 
 def butter_lowpass(cutoff, fs, order=6):
@@ -245,8 +253,8 @@ if __name__ == "__main__":
             test_output = rnn(t_x)
             # pred_y = torch.max(test_output, 1)[1].cuda().data.squeeze()
             pred_y = torch.max(test_output, 1)[1].data.squeeze()
-            print("pred:", pred_y)
-            print("y", t_y)
+            # print("pred:", pred_y)
+            # print("y", t_y)
             right = torch.sum(pred_y == t_y).type(torch.FloatTensor)
             total += t_y.size()[0]
             correct += right
@@ -257,12 +265,42 @@ if __name__ == "__main__":
     #     print("本次训练准确率:", score_this_fold)
     print("10折平均准确率：", np.mean(result))
 
+
+
+    # 采用所有信号进行训练:
+    #
+    final_train_data = torch.from_numpy(np.array(EMGDATA)).type(torch.FloatTensor)
+    final_train_label = torch.from_numpy(np.array(EMGLABEL)).type(torch.LongTensor)
+
+    final_train_Dataset = Data.TensorDataset(train_data, train_label)
+    final_train_loader = Data.DataLoader(
+        dataset=final_train_Dataset,
+        batch_size=64,
+        shuffle=True)
+
+    final_rnn = RNN()
+    print(final_rnn)
+
+    optimizer_final = torch.optim.Adam(final_rnn.parameters(), lr=0.01)
+    loss_func_final = nn.CrossEntropyLoss()
+
+    for epoch in range(40):
+        for step, (b_x, b_y) in enumerate(final_train_loader):
+            b_x = b_x.view(-1, 8, 500)
+            # print(b_x.shape)
+            output = final_rnn(b_x)  # rnn output
+            loss = loss_func_final(output, b_y)  # cross entropy loss
+            optimizer_final.zero_grad()  # clear gradients for this training step
+            loss.backward()  # backpropagation, compute gradients
+            optimizer_final.step()
+
+
     print("采用此模型对信号进行测试：")
     file = 'gesture1.csv'
     gesture = readgesture(file)
     gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
     gesture = gesture.view(-1, 8, 500)
-    test_output = rnn(gesture)
+    test_output = final_rnn(gesture)
     pred_y = torch.max(test_output, 1)[1].data.squeeze()
     print("pred:", pred_y)
     print("true label:", 1)
@@ -273,12 +311,12 @@ if __name__ == "__main__":
     gesture = readgesture(file)
     gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
     gesture = gesture.view(-1, 8, 500)
-    test_output = rnn(gesture)
+    test_output = final_rnn(gesture)
     pred_y = torch.max(test_output, 1)[1].data.squeeze()
     print("pred:", pred_y)
     print("true label:", 0)
 
-    torch.save(rnn, "PytorchModel_RNN_extended.pkl")
+    # torch.save(final_rnn, "PytorchModel_RNN_all_extended.pkl")
 
     for i in range(10):
         time_start = time.clock()
@@ -287,7 +325,7 @@ if __name__ == "__main__":
         gesture = readgesture(file)
         gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
         gesture = gesture.view(-1, 8, 500)
-        test_output = rnn(gesture)
+        test_output = final_rnn(gesture)
         pred_y = torch.max(test_output, 1)[1].data.squeeze()
         elapsed = (time.clock() - time_start)
         print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
@@ -300,7 +338,7 @@ if __name__ == "__main__":
         gesture = readgesture(file)
         gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
         gesture = gesture.view(-1, 8, 500)
-        test_output = rnn(gesture)
+        test_output = final_rnn(gesture)
         pred_y = torch.max(test_output, 1)[1].data.squeeze()
         elapsed = (time.clock() - time_start)
         print(i,'这个动作为',pred_y.item(),' 使用时间：',elapsed)
