@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
             else:
                 gesture = readgesture(file_name)
-                # print(gesture.shape)
+                print(gesture.shape)
                 gesture = torch.from_numpy(gesture).type(torch.FloatTensor)
                 test_output = cnn(gesture)[0]
                 pred_y = torch.max(test_output, 1)[1].data.squeeze()
