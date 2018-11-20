@@ -189,7 +189,7 @@ if __name__ == "__main__":
                 test_output = rnn(gesture)
                 pred_y = torch.max(test_output, 1)[1].data.squeeze()
                 print("read",file_name, '这个动作为', pred_y.item())
-                data = {"name": pred_y.item()}
+                data = {"result": pred_y.item()}
 
                 with open("result.json", 'w') as json_file:
                     json.dump(data, json_file)

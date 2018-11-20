@@ -154,6 +154,16 @@ for parent, subdir, filenames in os.walk(rootpath):
                  print("wrong")
 
         #cutpoint is the result o segment, make 10 segments
+        emg1 = max_min_normalization(emg1_abs)
+        emg2 = max_min_normalization(emg2_abs)
+        emg3 = max_min_normalization(emg3_abs)
+        emg4 = max_min_normalization(emg4_abs)
+        emg5 = max_min_normalization(emg5_abs)
+        emg6 = max_min_normalization(emg6_abs)
+        emg7 = max_min_normalization(emg7_abs)
+        emg8 = max_min_normalization(emg8_abs)
+
+
 
         # i is from 0 - 10
         for i in range(0, len(cutpoint) - 1):
@@ -166,7 +176,6 @@ for parent, subdir, filenames in os.walk(rootpath):
             tck_emg1 = interpolate.splrep(x, gesture_emg1)
             gesture_emg1_bspline = interpolate.splev(x_new, tck_emg1)
             gesture_emg1_bspline_abs = list(map(abs, gesture_emg1_bspline))
-
 
             gesture_emg2 = np.array(emg2[cutpoint[i]:cutpoint[i + 1]])
             gesture_emg2 = butter_lowpass_filter(gesture_emg2, cutoff, fs)
@@ -230,7 +239,7 @@ for parent, subdir, filenames in os.walk(rootpath):
 
             #print('gesture shape:',len(gesture))
 
-            gesture = max_min_normalization(gesture)
+            # gesture = max_min_normalization(gesture)
             # plt.plot(gesture)
             # plt.show()
             gesture = gesture.reshape(-1, 8, 5000)
@@ -241,6 +250,26 @@ for parent, subdir, filenames in os.walk(rootpath):
             # plt.show()
             EMGDATA.append(gesture)
             EMGLABEL.append(i)
+
+            plt.subplot(4, 2, 1)
+            plt.plot(gesture_emg1_bspline_abs)
+            plt.subplot(4, 2, 2)
+            plt.plot(gesture_emg2_bspline_abs)
+            plt.subplot(4, 2, 3)
+            plt.plot(gesture_emg3_bspline_abs)
+            plt.subplot(4, 2, 4)
+            plt.plot(gesture_emg4_bspline_abs)
+            plt.subplot(4, 2, 5)
+            plt.plot(gesture_emg5_bspline_abs)
+            plt.subplot(4, 2, 6)
+            plt.plot(gesture_emg6_bspline_abs)
+            plt.subplot(4, 2, 7)
+            plt.plot(gesture_emg7_bspline_abs)
+            plt.subplot(4, 2, 8)
+            plt.plot(gesture_emg8_bspline_abs)
+            plt.show()
+
+
 
 
 
@@ -255,5 +284,5 @@ print("totally read csv file number:",count)
 print('length of EMGDATA:', len(EMGDATA))
 print('length of EMGLABEL',len(EMGLABEL))
 
-np.save("EMGDATA_norm_extended.npy",np.array(EMGDATA))
-np.save("EMGLABEL_extended.npy",np.array(EMGLABEL))
+# np.save("EMGDATA_norm_extended.npy",np.array(EMGDATA))
+# np.save("EMGLABEL_extended.npy",np.array(EMGLABEL))

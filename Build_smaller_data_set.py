@@ -155,6 +155,17 @@ for parent, subdir, filenames in os.walk(rootpath):
 
         #cutpoint is the result o segment, make 10 segments
 
+
+        #cutpoint is the result o segment, make 10 segments
+        emg1 = max_min_normalization(emg1_abs)
+        emg2 = max_min_normalization(emg2_abs)
+        emg3 = max_min_normalization(emg3_abs)
+        emg4 = max_min_normalization(emg4_abs)
+        emg5 = max_min_normalization(emg5_abs)
+        emg6 = max_min_normalization(emg6_abs)
+        emg7 = max_min_normalization(emg7_abs)
+        emg8 = max_min_normalization(emg8_abs)
+
         # i is from 0 - 10
         for i in range(0, len(cutpoint) - 1):
             #print(i)
@@ -257,5 +268,5 @@ print('length of EMGLABEL',len(EMGLABEL))
 plt.plot(EMGDATA[0][0][0])
 plt.show()
 
-np.save("EMGDATA_norm_extended_desampled.npy",np.array(EMGDATA))
-np.save("EMGLABEL_extended_desampled.npy",np.array(EMGLABEL))
+np.save("EMGDATA_norm_extended_desampled_abs.npy",np.array(EMGDATA))
+np.save("EMGLABEL_extended_desampled_abs.npy",np.array(EMGLABEL))

@@ -103,6 +103,16 @@ def readgesture(file):
     # plt.plot(emg1_abs)
     # plt.show()
 
+    emg1_abs = max_min_normalization(emg1_abs)
+    emg2_abs = max_min_normalization(emg2_abs)
+    emg3_abs = max_min_normalization(emg3_abs)
+    emg4_abs = max_min_normalization(emg4_abs)
+    emg5_abs = max_min_normalization(emg5_abs)
+    emg6_abs = max_min_normalization(emg6_abs)
+    emg7_abs = max_min_normalization(emg7_abs)
+    emg8_abs = max_min_normalization(emg8_abs)
+
+
     x = np.linspace(0, len(emg1_abs), len(emg1_abs))
     x_new = np.linspace(0, len(emg1_abs), 500)
 
@@ -166,7 +176,7 @@ def readgesture(file):
     gesture = np.append(gesture, gesture_emg6_bspline_abs)
     gesture = np.append(gesture, gesture_emg7_bspline_abs)
     gesture = np.append(gesture, gesture_emg8_bspline_abs)
-    gesture = max_min_normalization(gesture)
+    # gesture = max_min_normalization(gesture)
     gesture = gesture.reshape(1, 8, 500)
     return gesture
 
@@ -176,8 +186,8 @@ if __name__ == "__main__":
 
     time_readstart = time.clock()
 
-    EMGDATA = np.load("EMGDATA_norm_extended_desampled.npy")
-    EMGLABEL = np.load("EMGLABEL_extended_desampled.npy")
+    EMGDATA = np.load("EMGDATA_norm_extended_desampled_abs.npy")
+    EMGLABEL = np.load("EMGLABEL_extended_desampled_abs.npy")
 
     finishREAD = (time.clock() - time_readstart)
 
@@ -272,7 +282,7 @@ if __name__ == "__main__":
     final_train_data = torch.from_numpy(np.array(EMGDATA)).type(torch.FloatTensor)
     final_train_label = torch.from_numpy(np.array(EMGLABEL)).type(torch.LongTensor)
 
-    final_train_Dataset = Data.TensorDataset(train_data, train_label)
+    final_train_Dataset = Data.TensorDataset(final_train_data, final_train_label)
     final_train_loader = Data.DataLoader(
         dataset=final_train_Dataset,
         batch_size=64,
@@ -316,7 +326,7 @@ if __name__ == "__main__":
     print("pred:", pred_y)
     print("true label:", 0)
 
-    # torch.save(final_rnn, "PytorchModel_RNN_all_extended.pkl")
+    torch.save(final_rnn, "PytorchModel_RNN_all_extended_abs.pkl")
 
     for i in range(10):
         time_start = time.clock()
