@@ -9,5 +9,6 @@ for reference, visit http://capstone.utu.fi/en-mirrortherapy
 
 and for whole codes, refer to https://gitlab.utu.fi/capstone
 
-our teach timo is very nice
+our teacher timo is very nice
 
+from the project, I have learned a lot
