@@ -26,7 +26,6 @@ class RNN(nn.Module):
     def forward(self, x):
         r_out, (h_n, h_c) = self.rnn(x, None)
         # h_n shape (n_layers, batch, hidden_size)   LSTM 有两个 hidden states, h_n 是分线, h_c 是主线
-        # h_c shape (n_layers, batch, hidden_size)
         out = self.out(r_out[:, -1, :])  # 选取最后一个时间点的output（看完整段信号之后进行判断）
         return out
 
