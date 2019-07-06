@@ -1,3 +1,7 @@
+# Capstone Project of University of Turku
+
+Link:http://capstone.utu.fi/en-mirrortherapy
+
 ## Goal
 The principle of mirror therapy (MT) is the use of a
 mirror to create a reflective illusion of an affected limb
