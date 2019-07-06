@@ -195,7 +195,7 @@ if __name__ == "__main__":
                     json.dump(data, json_file)
 
 
-        #     上传JSON文件
+        #     upload JSON file
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # 跳过了远程连接中选择‘是’的环节,
         ssh.connect('119.23.243.57', 22, 'root', 'Fdan123@')
